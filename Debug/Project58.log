@@ -1,0 +1,11 @@
+﻿  MainScene.cpp
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(78,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(79,38): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(80,19): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(106,22): warning C4305: '-=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(109,22): warning C4305: '+=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(112,20): warning C4305: '+=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(115,20): warning C4305: '-=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(118,22): warning C4305: '+=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\kjh04\source\repos\Project58\MainScene.cpp(121,22): warning C4305: '-=': 'double'에서 'float'(으)로 잘립니다.
+  Project58.vcxproj -> C:\Users\kjh04\source\repos\Project58\Debug\Project58.exe
