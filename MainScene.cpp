@@ -6,10 +6,11 @@ using namespace std;
 
 // 창의 크기
 #define winSize		500
+int corrWin = (winSize / 2); // 윈도우 사이즈에 따른 중앙 보정값
 
 // 플레이어 설정
 float	playerRadius = 20.0;
-int		selectingPlayer = -1;
+int		selectedPlayer = -1;
 float	height = 20.0; // 뚜껑의 높이
 
 // 카메라 설정
@@ -19,13 +20,15 @@ float	cameraZoom = 610.0;
 float	boardWidth = 250.0;
 float	boardHeight = -5.0;
 
-// 플레이어의 좌표, 마우스의 좌표, 움직일 거리
+// 플레이어의 좌표, 마우스의 좌표, 움직일 거리, 보정된 클릭위치
 float playerX = 0.0;
 float playerY = 0.0;
 float mouseX = 0.0;
 float mouseY = 0.0;
 float movingX = 0.0;
 float movingY = 0.0;
+float corrClickX = 0.0;
+float corrClickY = 0.0;
 
 GLUquadricObj* qobj; // 원기둥 오브젝트
 
@@ -46,9 +49,9 @@ GLfloat		vertices[][3] = {
 	{ boardWidth, -boardWidth, boardHeight } };	// 7 아랫쪽 좌상단
 
 GLfloat		redPosition[][2] = {
-	{0, 0},
+	{20, 10},
 	{50, 50},
-	{30, 30}
+	{100, 30}
 
 };
 
@@ -179,13 +182,12 @@ void display(void)
 	glFlush();
 }
 
-bool IsSelecting(int i)
+bool IsSelected(int i)
 {
-	int corrWin = (winSize / 2); // 윈도우 사이즈에 따른 중앙 보정값
 	int corrRadius = playerRadius; // 카메라 위치에 따른 반지름 보정값
 
-	if (redPosition[i][0] + corrRadius >= playerX - corrWin && redPosition[i][0] - corrRadius <= playerX - corrWin)
-		if ((-1 * redPosition[i][1]) + corrRadius >= playerY - corrWin && (-1 * redPosition[i][1]) - corrRadius <= playerY - corrWin)
+	if (redPosition[i][0] + corrRadius >= corrClickX && redPosition[i][0] - corrRadius <= corrClickX)
+		if ((-1 * redPosition[i][1]) + corrRadius >= corrClickY && (-1 * redPosition[i][1]) - corrRadius <= corrClickY)
 			return true;
 
 	return false;
@@ -195,39 +197,41 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 {
 	if (Button == GLUT_LEFT_BUTTON && State == GLUT_DOWN)
 	{
-		// 좌클릭시 바둑알                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   의 좌표 저장
+		// 마우스 누른 위치                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                의 좌표 저장
 		playerX = X;
 		playerY = Y;
+
+		// 보정된 마우스 클릭 위치
+		corrClickX = X - corrWin;
+		corrClickY = Y - corrWin;
 	}
 
 	if (Button == GLUT_LEFT_BUTTON && State == GLUT_UP)
 	{
-		selectingPlayer = -1;
+		// 마우스 땐 위치
+		mouseX = X;
+		mouseY = Y;
 
+		selectedPlayer = -1;
+
+		// 플레이어를 선택 하였는가?
 		for (int i = 0; i < sizeof(redPosition) / (sizeof(int) * 2); i++)
 		{
-			if (IsSelecting(i))
-				selectingPlayer = i;
+			if (IsSelected(i))
+				selectedPlayer = i;
 		}
 
-		if (selectingPlayer == -1)
+		if (selectedPlayer == -1)
 		{
-			cout << "실패" << endl;//test
-			cout << -1 * redPosition[0][0] << " " << -1 * redPosition[0][1] << endl;//test
-			cout << playerX - (winSize / 2) << " " << playerY - (winSize / 2) << endl;//test
 			return;
-
 		}
 
 		// 움직일 거리 계산
-		movingX = abs(redPosition[selectingPlayer][0]) - abs(mouseX);
-		movingY = abs(redPosition[selectingPlayer][1]) - abs(mouseY);
-		cout << "통과 " << selectingPlayer << endl;//test
-		cout << "movingX " << movingX << endl; //test
-		cout << "movingY " << movingY << endl; //test
+		movingX = abs(playerX) - abs(mouseX);
+		movingY = abs(playerY) - abs(mouseY);
 
-		redPosition[selectingPlayer][0] += movingX / 10;
-		redPosition[selectingPlayer][1] -= movingY / 10;
+		redPosition[selectedPlayer][0] += (movingX/2);
+		redPosition[selectedPlayer][1] -= (movingY/2);
 
 		glutPostRedisplay();
 
@@ -237,8 +241,8 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 void mouseMotion(GLint X, GLint Y)
 {
 	// 마우스의 좌표
-	mouseX = X;
-	mouseY = Y;
+	mouseX = X - corrWin;
+	mouseY = Y - corrWin;
 }
 
 int main(int argc, char** argv)
