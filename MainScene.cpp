@@ -1,37 +1,129 @@
 #include <gl/glut.h>
 #include <math.h>  
+#include <iostream>
 
 using namespace std;
 
-float	Radius = 1.0;
+// 창의 크기
+#define winSize		500
 
-float	cameraRadius = 5.0;
-float	cameraTheta = 0.0;
-float	cameraPhi = 0.0;
+// 플레이어 설정
+float	playerRadius = 10.0;
+int		selectingPlayer = -1;
+float	height = 10.0; // 뚜껑의 높이
+
+// 카메라 설정
+float	cameraZoom = 610.0;
+
+// 게임판 사이즈 설정
+float	boardWidth = 250.0;
+float	boardHeight = -5.0;
+
+// 플레이어의 좌표, 마우스의 좌표, 움직일 거리
+float playerX = 0.0;
+float playerY = 0.0;
+float mouseX = 0.0;
+float mouseY = 0.0;
+float movingX = 0.0;
+float movingY = 0.0;
+
+GLfloat ambientLight[] = { 0.3f,0.3f,0.3f,1.0f }; // 주변광
+GLfloat diffuseLight[] = { 0.7f,0.7f,0.7f,1.0f }; // 분산광
+GLfloat specular[] = { 1.0f,1.0f,1.0f,1.0f }; // 반사광
+GLfloat position[] = { 400.0f,300.0f,700.0f,1.0f }; // 광원의 위치
 
 GLfloat		vertices[][3] = {
 	// x, y, z
-	{ -1.0, -1.0,  0.5 },	// 0 윗쪽 좌하단
-	{ -1.0,  1.0,  0.5 },	// 1 윗쪽 우하단
-	{ 1.0,  1.0,  0.5 },	// 2 윗쪽 우상단
-	{ 1.0, -1.0,  0.5 },	// 3 윗쪽 좌상단
-	{ -1.0, -1.0, 0 },	// 4 아랫쪽 좌하단
-	{ -1.0,  1.0, 0 },	// 5 아랫쪽 우하단
-	{ 1.0,  1.0, 0 },	// 6 아랫쪽 우상단
-	{ 1.0, -1.0, 0 } };	// 7 아랫쪽 좌상단
+	{ -boardWidth, -boardWidth,  0 },	// 0 윗쪽 좌하단
+	{ -boardWidth,  boardWidth,  0 },	// 1 윗쪽 우하단
+	{ boardWidth,  boardWidth,  0 },	// 2 윗쪽 우상단
+	{ boardWidth, -boardWidth,  0 },	// 3 윗쪽 좌상단
+	{ -boardWidth, -boardWidth, boardHeight },	// 4 아랫쪽 좌하단
+	{ -boardWidth,  boardWidth, boardHeight },	// 5 아랫쪽 우하단
+	{ boardWidth,  boardWidth, boardHeight },	// 6 아랫쪽 우상단
+	{ boardWidth, -boardWidth, boardHeight } };	// 7 아랫쪽 좌상단
+
+GLfloat		redPosition[][2] = {
+	{0, 0},
+	{50, 50},
+	{30, 30}
+
+};
 
 // 초기설정
 void init(void)
 {
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_NORMALIZE); //단위 법선 벡터
+	glEnable(GL_SMOOTH);  // 안티 알리아싱 제거
+	glEnable(GL_LIGHTING); // 조명
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glEnable(GL_LIGHT0);
+
+	glEnable(GL_COLOR_MATERIAL); // 재질 색감 표현
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+}
+
+
+void DrawRedPlayer() {
+	glInitNames();
+
+	glPushMatrix();
+	// 원기둥
+	glTranslated(redPosition[0][0], redPosition[0][1], 0);
+	GLUquadricObj* qobj_0;
+	qobj_0 = gluNewQuadric();
+	gluQuadricDrawStyle(qobj_0, GL_POLYGON);
+	gluCylinder(qobj_0, playerRadius, playerRadius, height, 50, 50);
+	// 뚜껑
+	glTranslated(0, 0, height);
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < 360; i++)
+	{
+		float angle = i * 3.141592 / 180;
+		glVertex2f((cos(angle) * playerRadius), (sin(angle) * playerRadius));
+	}
+	glPopMatrix();
+
+	glPushMatrix();
+	// 원기둥
+	glTranslated(redPosition[1][0], redPosition[1][1], 0);
+	GLUquadricObj* qobj_1;
+	qobj_1 = gluNewQuadric();
+	gluQuadricDrawStyle(qobj_1, GL_POLYGON);
+	gluCylinder(qobj_1, playerRadius, playerRadius, height, 50, 50);
+	// 뚜껑
+	glTranslated(0, 0, height);
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < 360; i++)
+	{
+		float angle = i * 3.141592 / 180;
+		glVertex2f((cos(angle) * playerRadius), (sin(angle) * playerRadius));
+	}
+	glPopMatrix();
+
+	glEnd();
+	glFinish();
+
 }
 
 
 void polygon(int a, int b, int c, int d) {
 	glBegin(GL_POLYGON);
+	glColor3f(0, 1, 0); // 테스트용
 	glVertex3fv(vertices[a]);
+	glColor3f(0, 1, 1); // 테스트용
 	glVertex3fv(vertices[b]);
+	glColor3f(0, 0, 1); // 테스트용
 	glVertex3fv(vertices[c]);
+	glColor3f(1, 0, 0); // 테스트용
 	glVertex3fv(vertices[d]);
 	glEnd();
 }
@@ -74,15 +166,14 @@ void reshape(int w, int h)
 // 카메라 위치 설정
 void cameraSetting(void)
 {
-	float	x, y, z;
-
-	x = cameraRadius * cos(cameraTheta) * cos(cameraPhi);
-	y = cameraRadius * sin(cameraTheta) * cos(cameraPhi);
-	z = cameraRadius * sin(cameraPhi);
-
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(x, y, z, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+	/*
+	eyeX, eyeY, eyeZ : 눈의 위치(카메라의 위치)
+	centerX, centerY, centerZ : 카메라의 초점(참조 위치)
+	upX, upY, upZ : 카메라의 위쪽벡터 방향 지정(x가 1이면 x축으로 누워있고, y가 1이면 y축을 중심으로 세워져있다.)
+	*/
+	gluLookAt(0.0, 0.0, cameraZoom, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 // 화면 그리기
@@ -96,43 +187,79 @@ void display(void)
 	drawAxis();
 
 	drawGameBoard();
+	DrawRedPlayer();
 
 	glFlush();
 }
 
-void inputKey(unsigned char key, int x, int y)
+bool IsSelecting(int i)
 {
-	switch (key) {
-	case 'a':
-		cameraTheta -= 0.01; 	break;
+	int corrWin = (winSize / 2); // 윈도우 사이즈에 따른 중앙 보정값
+	int corrRadius = playerRadius; // 카메라 위치에 따른 반지름 보정값
 
-	case 'd':
-		cameraTheta += 0.01;	break;
+	if (redPosition[i][0] + corrRadius >= playerX - corrWin && redPosition[i][0] - corrRadius <= playerX - corrWin)
+		if ((-1 * redPosition[i][1]) + corrRadius >= playerY - corrWin && (-1 * redPosition[i][1]) - corrRadius <= playerY - corrWin)
+			return true;
 
-	case 'w':
-		cameraPhi += 0.01;		break;
+	return false;
+}
 
-	case 's':
-		cameraPhi -= 0.01;		break;
-
-	case 'q':
-		cameraRadius += 0.1; break;
-
-	case 'e':
-		cameraRadius -= 0.1; break;
-
-	default:
-		break;
+void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
+{
+	if (Button == GLUT_LEFT_BUTTON && State == GLUT_DOWN)
+	{
+		// 좌클릭시 바둑알                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   의 좌표 저장
+		playerX = X;
+		playerY = Y;
 	}
-	glutPostRedisplay();
+
+	if (Button == GLUT_LEFT_BUTTON && State == GLUT_UP)
+	{
+		selectingPlayer = -1;
+
+		for (int i = 0; i < sizeof(redPosition) / (sizeof(int) * 2); i++)
+		{
+			if (IsSelecting(i))
+				selectingPlayer = i;
+		}
+
+		if (selectingPlayer == -1)
+		{
+			cout << "실패" << endl;//test
+			cout << -1 * redPosition[0][0] << " " << -1 * redPosition[0][1] << endl;//test
+			cout << playerX - (winSize / 2) << " " << playerY - (winSize / 2) << endl;//test
+			return;
+
+		}
+
+		// 움직일 거리 계산
+		movingX = abs(redPosition[selectingPlayer][0]) - abs(mouseX);
+		movingY = abs(redPosition[selectingPlayer][1]) - abs(mouseY);
+		cout << "통과 " << selectingPlayer << endl;//test
+		cout << "movingX " << movingX << endl; //test
+		cout << "movingY " << movingY << endl; //test
+
+		redPosition[selectingPlayer][0] += movingX / 10;
+		redPosition[selectingPlayer][1] -= movingY / 10;
+
+		glutPostRedisplay();
+
+	}
+}
+
+void mouseMotion(GLint X, GLint Y)
+{
+	// 마우스의 좌표
+	mouseX = X;
+	mouseY = Y;
 }
 
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
-	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(500, 500);
+	glutInitWindowPosition(winSize, winSize);
+	glutInitWindowSize(winSize, winSize);
 	glutCreateWindow("알까기 게임");
 
 	init();
@@ -140,7 +267,8 @@ int main(int argc, char** argv)
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 
-	glutKeyboardFunc(inputKey);
+	glutMouseFunc(mouseEvent);
+	glutMotionFunc(mouseMotion);
 
 	glutMainLoop();
 

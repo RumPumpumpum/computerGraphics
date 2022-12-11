@@ -139,7 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GameBoard.cpp" />
     <ClCompile Include="MainScene.cpp" />
   </ItemGroup>
   <ItemGroup>
