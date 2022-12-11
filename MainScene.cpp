@@ -8,9 +8,9 @@ using namespace std;
 #define winSize		500
 
 // ÇÃ·¹ÀÌ¾î ¼³Á¤
-float	playerRadius = 10.0;
+float	playerRadius = 20.0;
 int		selectingPlayer = -1;
-float	height = 10.0; // ¶Ñ²±ÀÇ ³ôÀÌ
+float	height = 20.0; // ¶Ñ²±ÀÇ ³ôÀÌ
 
 // Ä«¸Þ¶ó ¼³Á¤
 float	cameraZoom = 610.0;
@@ -26,6 +26,8 @@ float mouseX = 0.0;
 float mouseY = 0.0;
 float movingX = 0.0;
 float movingY = 0.0;
+
+GLUquadricObj* qobj; // ¿ø±âµÕ ¿ÀºêÁ§Æ®
 
 GLfloat ambientLight[] = { 0.3f,0.3f,0.3f,1.0f }; // ÁÖº¯±¤
 GLfloat diffuseLight[] = { 0.7f,0.7f,0.7f,1.0f }; // ºÐ»ê±¤
@@ -72,45 +74,28 @@ void init(void)
 }
 
 
-void DrawRedPlayer() {
-	glInitNames();
+void DrawRedPlayer(int num) {
 
 	glPushMatrix();
 	// ¿ø±âµÕ
-	glTranslated(redPosition[0][0], redPosition[0][1], 0);
-	GLUquadricObj* qobj_0;
-	qobj_0 = gluNewQuadric();
-	gluQuadricDrawStyle(qobj_0, GL_POLYGON);
-	gluCylinder(qobj_0, playerRadius, playerRadius, height, 50, 50);
-	// ¶Ñ²±
-	glTranslated(0, 0, height);
-	glBegin(GL_POLYGON);
-	for (int i = 0; i < 360; i++)
-	{
-		float angle = i * 3.141592 / 180;
-		glVertex2f((cos(angle) * playerRadius), (sin(angle) * playerRadius));
-	}
-	glPopMatrix();
-
-	glPushMatrix();
-	// ¿ø±âµÕ
-	glTranslated(redPosition[1][0], redPosition[1][1], 0);
-	GLUquadricObj* qobj_1;
-	qobj_1 = gluNewQuadric();
-	gluQuadricDrawStyle(qobj_1, GL_POLYGON);
-	gluCylinder(qobj_1, playerRadius, playerRadius, height, 50, 50);
-	// ¶Ñ²±
-	glTranslated(0, 0, height);
-	glBegin(GL_POLYGON);
-	for (int i = 0; i < 360; i++)
-	{
-		float angle = i * 3.141592 / 180;
-		glVertex2f((cos(angle) * playerRadius), (sin(angle) * playerRadius));
-	}
-	glPopMatrix();
-
+	glTranslated(redPosition[num][0], redPosition[num][1], 0);
+	qobj = gluNewQuadric();
+	gluQuadricDrawStyle(qobj, GL_POLYGON);
+	gluCylinder(qobj, playerRadius, playerRadius, height, 50, 50);
 	glEnd();
-	glFinish();
+	glPopMatrix();
+
+	glPushMatrix();
+	// ¶Ñ²±
+	glTranslated(redPosition[num][0], redPosition[num][1], height);
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < 360; i++)
+	{
+		float angle = i * 3.141592 / 180;
+		glVertex2f((cos(angle) * playerRadius), (sin(angle) * playerRadius));
+	}
+	glEnd();
+	glPopMatrix();
 
 }
 
@@ -187,7 +172,9 @@ void display(void)
 	drawAxis();
 
 	drawGameBoard();
-	DrawRedPlayer();
+
+	for (int i = 0; i < sizeof(redPosition) / (sizeof(int) * 2); i++)
+		DrawRedPlayer(i);
 
 	glFlush();
 }
