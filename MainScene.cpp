@@ -4,8 +4,9 @@
 
 using namespace std;
 
-// 창의 크기
-#define winSize		500
+
+#define winSize		500		// 창의 크기
+#define playerNum	5		// 플레이어 수
 
 int corrWin = (winSize / 2); // 윈도우 사이즈에 따른 중앙 보정값
 
@@ -18,7 +19,7 @@ float	height = 20.0; // 뚜껑의 높이
 float	cameraZoom = 610.0;
 
 // 게임판 사이즈 설정
-float	boardWidth = 250.0;
+float	boardWidth = 230.0;
 float	boardHeight = -5.0;
 
 // 좌표들
@@ -49,16 +50,30 @@ GLfloat		vertices[][3] = {
 	{ boardWidth,  boardWidth, boardHeight },	// 6 아랫쪽 우상단
 	{ boardWidth, -boardWidth, boardHeight } };	// 7 아랫쪽 좌상단
 
-GLfloat		redPosition[][2] = {
-	{20, 10},
-	{50, 50},
-	{100, 30}
 
+class Player
+{
+public:
+	GLfloat x, y;
+	GLfloat dirX = 0.0, dirY = 0.0;
+	GLfloat velocity;
+	char teamColor;
 };
+
+Player* player = new Player[playerNum];
+void RunPhysics();
+bool IsCollision(int j, int k);
+
 
 // 초기설정
 void init(void)
 {
+	player[0].x = 0.0;		player[0].y = 0.0;		player[0].teamColor = 'r';
+	player[1].x = 50.0;		player[1].y = 50.0;		player[1].teamColor = 'r';
+	player[2].x = 100.0;	player[2].y = 100.0;	player[2].teamColor = 'r';
+	player[3].x = 150.0;	player[3].y = 150.0;	player[3].teamColor = 'b';
+	player[4].x = 200.0;	player[4].y = 200.0;	player[4].teamColor = 'b';
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE); //단위 법선 벡터
 	glEnable(GL_SMOOTH);  // 안티 알리아싱 제거
@@ -78,24 +93,29 @@ void init(void)
 }
 
 
-void DrawRedPlayer(int num) {
+void DrawPlayer(int num) {
+	if (player[num].teamColor == 'r')		glColor3f(1.0, 0.0, 0.0); // red color
+	else if (player[num].teamColor == 'b') 	glColor3f(0.0, 0.0, 1.0); // blue color
 
 	glPushMatrix();
 	// 원기둥
-	glTranslated(redPosition[num][0], redPosition[num][1], 0);
+	glTranslated(player[num].x, player[num].y, 0);
 	qobj = gluNewQuadric();
 	gluQuadricDrawStyle(qobj, GL_POLYGON);
+
 	gluCylinder(qobj, playerRadius, playerRadius, height, 50, 50);
 	glEnd();
 	glPopMatrix();
 
 	glPushMatrix();
 	// 뚜껑
-	glTranslated(redPosition[num][0], redPosition[num][1], height);
+	glTranslated(player[num].x, player[num].y, height);
 	glBegin(GL_POLYGON);
+
 	for (int i = 0; i < 360; i++)
 	{
 		float angle = i * 3.141592 / 180;
+
 		glVertex2f((cos(angle) * playerRadius), (sin(angle) * playerRadius));
 	}
 	glEnd();
@@ -143,25 +163,6 @@ void drawAxis(void) {
 	glEnd();
 }
 
-void DrawAimingLine(GLint X, GLint Y)
-{
-	GLfloat targetX, targetY;
-
-	cout << "작동중" << endl;
-
-
-	targetX = redPosition[selectedPlayer][0] + ((abs(playerX) - abs(X)) / 2);
-	targetY = redPosition[selectedPlayer][1] - ((abs(playerY) - abs(Y)) / 2);
-
-	glBegin(GL_LINES);
-	glColor3f(1.0, 0.0, 0.0); // red color
-
-	glVertex3f(redPosition[selectedPlayer][0], redPosition[selectedPlayer][1], 0.0);
-	glVertex3f(targetX, targetY, 0.0);
-	glEnd();
-	glFlush();
-
-}
 
 // 화면의 비율 유지
 void reshape(int w, int h)
@@ -196,18 +197,71 @@ void display(void)
 	drawAxis();
 	drawGameBoard();
 
-	for (int i = 0; i < sizeof(redPosition) / (sizeof(int) * 2); i++)
-		DrawRedPlayer(i);
+	for (int i = 0; i < playerNum; i++)
+		DrawPlayer(i);
+
+	RunPhysics();
 
 	glFlush();
 }
 
+void RunPhysics()
+{
+	for (int i = 0; i < playerNum; i++)
+	{
+		if (player[i].velocity > 0)
+		{
+			player[i].x += (player[i].dirX / 100) * (player[i].velocity / 100);
+			player[i].y -= (player[i].dirY / 100) * (player[i].velocity / 100);
+		}
+
+
+
+		for (int j = 0; j < playerNum; j++)
+		{
+			if (IsCollision(i, j))
+			{
+				player[j].velocity = player[i].velocity;
+				player[j].dirX = player[i].dirX;
+				player[j].dirY = player[i].dirY;
+
+				player[i].x -= (player[i].dirX / 100) * (player[i].velocity / 100);
+				player[i].y += (player[i].dirY / 100) * (player[i].velocity / 100);
+				player[i].velocity = player[i].velocity/2;
+			}
+
+		}
+		
+		player[i].velocity -= 0.5;
+
+		if (player[i].velocity < 0.0)
+			player[i].velocity = 0.0;
+
+		glutPostRedisplay();
+
+	}
+}
+
+bool IsCollision(int i, int j)
+{
+	float xSquare, ySquare, radiusSquare;
+
+	if (i == j)	return false;
+
+	xSquare = (player[i].x - player[j].x) * (player[i].x - player[j].x);
+	ySquare = (player[i].y - player[j].y) * (player[i].y - player[j].y);
+	radiusSquare = (playerRadius + playerRadius) * (playerRadius + playerRadius);
+
+	if (xSquare + ySquare < radiusSquare)
+			return true;
+
+	return false;
+}
+
 bool IsSelected(int i)
 {
-	int corrRadius = playerRadius; // 카메라 위치에 따른 반지름 보정값
-
-	if (redPosition[i][0] + corrRadius >= corrClickX && redPosition[i][0] - corrRadius <= corrClickX)
-		if ((-1 * redPosition[i][1]) + corrRadius >= corrClickY && (-1 * redPosition[i][1]) - corrRadius <= corrClickY)
+	if (player[i].x + playerRadius >= corrClickX && player[i].x - playerRadius <= corrClickX)
+		if ((-1 * player[i].y) + playerRadius >= corrClickY && (-1 * player[i].y) - playerRadius <= corrClickY)
 			return true;
 
 	return false;
@@ -229,7 +283,7 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 		corrClickY = Y - corrWin;
 
 		// 플레이어를 선택 하였는가?
-		for (int i = 0; i < sizeof(redPosition) / (sizeof(int) * 2); i++)
+		for (int i = 0; i < playerNum; i++)
 		{
 			if (IsSelected(i))
 				selectedPlayer = i;
@@ -242,6 +296,8 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 		if (selectedPlayer == -1)
 			return;
 
+		cout << "성공" << endl;
+
 		// 마우스 땐 위치
 		mouseX = X;
 		mouseY = Y;
@@ -250,9 +306,18 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 		movingX = playerX - mouseX;
 		movingY = playerY - mouseY;
 
-		// 계산된 거리만큼 플레이어 이동
-		redPosition[selectedPlayer][0] += movingX;
-		redPosition[selectedPlayer][1] -= movingY;
+		// 이동방향 설정
+		player[selectedPlayer].dirX = movingX;
+		player[selectedPlayer].dirY = movingY;
+		// 속도 설정
+		float squareDirX, squareDirY;
+		squareDirX = player[selectedPlayer].dirX * player[selectedPlayer].dirX;
+		squareDirY = player[selectedPlayer].dirY * player[selectedPlayer].dirY;
+	
+		player[selectedPlayer].velocity = sqrt(squareDirX + squareDirY);
+		if (player[selectedPlayer].velocity > 100.0)	player[selectedPlayer].velocity = 100.0;
+
+		cout << player[selectedPlayer].velocity << endl;
 
 		glutPostRedisplay();
 		selectedPlayer = -1;		// 예외조건 초기화

@@ -1,12 +1,11 @@
 ﻿  MainScene.cpp
-D:\fork\computerGraphics\MainScene.cpp(98,15): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(207,17): warning C4244: '초기화 중': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(224,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(225,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(228,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(229,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(246,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(247,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(266,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(267,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(117,15): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(278,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(279,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(282,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(283,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(302,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(303,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(331,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(332,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Project58.vcxproj -> D:\fork\computerGraphics\x64\Debug\Project58.exe
