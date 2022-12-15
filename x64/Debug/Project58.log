@@ -1,11 +1,11 @@
 ﻿  MainScene.cpp
-D:\fork\computerGraphics\MainScene.cpp(132,15): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(343,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(344,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(347,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(348,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(367,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(368,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(399,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\fork\computerGraphics\MainScene.cpp(400,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(134,15): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(378,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(379,13): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(382,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(383,18): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(402,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(403,12): warning C4244: '=': 'GLint'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(435,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\fork\computerGraphics\MainScene.cpp(436,13): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Project58.vcxproj -> D:\fork\computerGraphics\x64\Debug\Project58.exe

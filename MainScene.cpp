@@ -23,10 +23,12 @@ float	height = 20.0; // 뚜껑의 높이
 
 // 카메라 설정
 float	cameraZoom = 610.0;
+int		cameraMode = 1;
+int		cameraCount = 0;
 
 // 게임판 사이즈 설정
 float	boardWidth = 230.0;
-float	boardHeight = -5.0;
+float	boardHeight = -100.0;
 
 // 좌표들
 float playerX = 0.0; // 클릭 좌표
@@ -67,9 +69,9 @@ public:
 };
 
 Player* player = new Player[playerNum];
+
 void RunPhysics();
 bool IsCollision(int j, int k);
-
 
 // 초기설정
 void init(void)
@@ -173,14 +175,31 @@ void reshape(int w, int h)
 // 카메라 위치 설정
 void cameraSetting(void)
 {
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	/*
-	eyeX, eyeY, eyeZ : 눈의 위치(카메라의 위치)
-	centerX, centerY, centerZ : 카메라의 초점(참조 위치)
-	upX, upY, upZ : 카메라의 위쪽벡터 방향 지정(x가 1이면 x축으로 누워있고, y가 1이면 y축을 중심으로 세워져있다.)
-	*/
-	gluLookAt(0.0, 0.0, cameraZoom, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+	if (cameraMode == 1) 
+	{
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		/*
+		eyeX, eyeY, eyeZ : 눈의 위치(카메라의 위치)
+		centerX, centerY, centerZ : 카메라의 초점(참조 위치)
+		upX, upY, upZ : 카메라의 위쪽벡터 방향 지정(x가 1이면 x축으로 누워있고, y가 1이면 y축을 중심으로 세워져있다.)
+		*/
+		gluLookAt(0.0, 0.0, cameraZoom, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	}
+	
+	else if (cameraMode == 2)
+	{
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		/*
+		eyeX, eyeY, eyeZ : 눈의 위치(카메라의 위치)
+		centerX, centerY, centerZ : 카메라의 초점(참조 위치)
+		upX, upY, upZ : 카메라의 위쪽벡터 방향 지정(x가 1이면 x축으로 누워있고, y가 1이면 y축을 중심으로 세워져있다.)
+		*/
+		gluLookAt(0.0, -660.0, 400, player[selectedPlayer].x, player[selectedPlayer].y, 0.0, 0.0, 1.0, 0.0);
+	}
+
 }
 
 void renderbitmap(float x, float y, void* font, char* string) {
@@ -216,13 +235,13 @@ void DrawText(void)
 	if (aliveBlue == 0)
 	{
 		glColor3f(1.0, 0.0, 0.0);
-		sprintf_s(buf, "Win RED");
+		sprintf_s(buf, "RED Win");
 		renderbitmap(0, 0, GLUT_BITMAP_TIMES_ROMAN_24, buf);
 	}
 	else if (aliveRed == 0)
 	{
 		glColor3f(0.0, 0.0, 1.0);
-		sprintf_s(buf, "Win Blue");
+		sprintf_s(buf, "Blue Win");
 		renderbitmap(0, 0, GLUT_BITMAP_TIMES_ROMAN_24, buf);
 	}
 
@@ -292,7 +311,6 @@ void RunPhysics()
 				player[i].y += (player[i].dirY / 100) * (player[i].velocity / 100);
 				player[i].velocity = player[i].velocity/2;
 			}
-
 		}
 		
 		player[i].velocity -= 0.5;
@@ -331,6 +349,23 @@ bool IsSelected(int i)
 
 	return false;
 }
+
+void CameraTimer(int value) {
+	cameraMode = 2;
+
+	cameraCount++;
+
+	if (cameraCount > 30)
+	{
+		cameraCount = 0;
+		cameraMode = 1;
+		return;
+	}
+
+	glutPostRedisplay();
+	glutTimerFunc(40, CameraTimer, 1);
+}
+
 
 void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 {
@@ -384,6 +419,7 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 
 		glutPostRedisplay();
 		selectedPlayer = -1;		// 예외조건 초기화
+		glutTimerFunc(40, CameraTimer, 1);	// 카메라 줌
 
 		// 턴 넘김
 
@@ -399,6 +435,7 @@ void mouseMotion(GLint X, GLint Y)
 	mouseX = X - corrWin;
 	mouseY = Y - corrWin;
 }
+
 
 int main(int argc, char** argv)
 {
