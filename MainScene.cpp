@@ -19,7 +19,8 @@ char currentTurn = 'r';
 // 플레이어 설정
 int		selectedPlayer = -1; // 플레이어가 선택 되었는지 판단
 float	playerRadius = 20.0; // 플레이어의 반지름
-float	height = 20.0; // 뚜껑의 높이
+float	height = 20.0;		 // 뚜껑의 높이
+int		speedControl = 80;  	 // 속도 제어값
 
 // 카메라 설정
 float	cameraZoom = 610.0;
@@ -293,8 +294,8 @@ void RunPhysics()
 	{
 		if (player[i].velocity > 0)
 		{
-			player[i].x += (player[i].dirX / 100) * (player[i].velocity / 100);
-			player[i].y -= (player[i].dirY / 100) * (player[i].velocity / 100);
+			player[i].x += (player[i].dirX / speedControl) * (player[i].velocity / speedControl);
+			player[i].y -= (player[i].dirY / speedControl) * (player[i].velocity / speedControl);
 		}
 
 
@@ -307,8 +308,8 @@ void RunPhysics()
 				player[j].dirX = player[i].dirX;
 				player[j].dirY = player[i].dirY;
 
-				player[i].x -= (player[i].dirX / 100) * (player[i].velocity / 100);
-				player[i].y += (player[i].dirY / 100) * (player[i].velocity / 100);
+				player[i].x -= (player[i].dirX / speedControl) * (player[i].velocity / speedControl);
+				player[i].y += (player[i].dirY / speedControl) * (player[i].velocity / speedControl);
 				player[i].velocity = player[i].velocity/2;
 			}
 		}
@@ -366,7 +367,6 @@ void CameraTimer(int value) {
 	glutTimerFunc(40, CameraTimer, 1);
 }
 
-
 void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 {
 
@@ -388,6 +388,7 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 			if (IsSelected(i))
 				selectedPlayer = i;
 		}
+
 	}
 
 	if (Button == GLUT_LEFT_BUTTON && State == GLUT_UP)
