@@ -1,63 +1,74 @@
+ï»¿#define _CRT_SECURE_NO_WARNINGS
 #include <gl/glut.h>
 #include <math.h>  
 #include <iostream>
+#include <mmsystem.h>Â Â Â Â 
+#pragma comment(lib,"winmm")
+
+#define SOUND_FILE_NAME_BGM "bgm.wav"
+#define SOUND_FILE_NAME_WIN "win.wav"
 
 using namespace std;
 
+#define winSize		500		// ì°½ì˜ í¬ê¸°
+#define playerNum	10		// í”Œë ˆì´ì–´ ìˆ˜
 
-#define winSize		500		// Ã¢ÀÇ Å©±â
-#define playerNum	10		// ÇÃ·¹ÀÌ¾î ¼ö
+int corrWin = (winSize / 2); // ìœˆë„ìš° ì‚¬ì´ì¦ˆì— ë”°ë¥¸ ì¤‘ì•™ ë³´ì •ê°’
 
-int corrWin = (winSize / 2); // À©µµ¿ì »çÀÌÁî¿¡ µû¸¥ Áß¾Ó º¸Á¤°ª
+// ë‚¨ì€ ëŒ
+int aliveRed, aliveGreen;
 
-// ³²Àº µ¹
-int aliveRed, aliveBlue;
-
-// ÇöÀç ÅÏ
+// í˜„ì¬ í„´
 char currentTurn = 'r';
 
-// ÇÃ·¹ÀÌ¾î ¼³Á¤
-int		selectedPlayer = -1; // ÇÃ·¹ÀÌ¾î°¡ ¼±ÅÃ µÇ¾ú´ÂÁö ÆÇ´Ü
-float	playerRadius = 20.0; // ÇÃ·¹ÀÌ¾îÀÇ ¹İÁö¸§
-float	height = 20.0;		 // ¶Ñ²±ÀÇ ³ôÀÌ
-int		speedControl = 80;  	 // ¼Óµµ Á¦¾î°ª
+// í”Œë ˆì´ì–´ ì„¤ì •
+int		selectedPlayer = -1; // í”Œë ˆì´ì–´ê°€ ì„ íƒ ë˜ì—ˆëŠ”ì§€ íŒë‹¨
+float	playerRadius = 20.0; // í”Œë ˆì´ì–´ì˜ ë°˜ì§€ë¦„
+float	height = 20.0;		 // ëšœê»‘ì˜ ë†’ì´
+int		speedControl = 80;  	 // ì†ë„ ì œì–´ê°’
 
-// Ä«¸Ş¶ó ¼³Á¤
+// ì¥ì• ë¬¼ ì„¤ì •
+//const int obstacleNum = 1; // ì¥ì• ë¬¼ ê°¯ìˆ˜
+//float obstaclePos[obstacleNum] = {0}; // ì¥ì• ë¬¼ Xì¢Œí‘œ
+int cubeSize = 40; // ì¥ì• ë¬¼ í¬ê¸°
+
+// ì¹´ë©”ë¼ ì„¤ì •
 float	cameraZoom = 610.0;
 int		cameraMode = 1;
-int		cameraCount = 0;
+int		cameraCount = 0; // ì¹´ë©”ë¼ ì§€ì†ì‹œê°„
+int		cameraObject; // ì¹´ë©”ë¼ê°€ ë”°ë¼ê°ˆ í”Œë ˆì´ì–´
 
-// °ÔÀÓÆÇ »çÀÌÁî ¼³Á¤
+// ê²Œì„íŒ ì‚¬ì´ì¦ˆ ì„¤ì •
 float	boardWidth = 230.0;
 float	boardHeight = -100.0;
 
-// ÁÂÇ¥µé
-float playerX = 0.0; // Å¬¸¯ ÁÂÇ¥
+// ì¢Œí‘œë“¤
+float playerX = 0.0; // í´ë¦­ ì¢Œí‘œ
 float playerY = 0.0;
-float mouseX = 0.0; // ¸¶¿ì½º¶© ÁÂÇ¥
+float mouseX = 0.0; // ë§ˆìš°ìŠ¤ë• ì¢Œí‘œ
 float mouseY = 0.0;
-float movingX = 0.0; // °è»êµÈ ¿òÁ÷ÀÏ À§Ä¡
+float movingX = 0.0; // ê³„ì‚°ëœ ì›€ì§ì¼ ìœ„ì¹˜
 float movingY = 0.0;
-float corrClickX = 0.0; // º¸Á¤µÈ Å¬¸¯ ÁÂÇ¥(°¡¿îµ¥°¡ (0,0), º¸Á¤ ÀüÀº ÁÂ»ó´ÜÀÌ (0,0))
+float corrClickX = 0.0; // ë³´ì •ëœ í´ë¦­ ì¢Œí‘œ(ê°€ìš´ë°ê°€ (0,0), ë³´ì • ì „ì€ ì¢Œìƒë‹¨ì´ (0,0))
 float corrClickY = 0.0;
 
-GLUquadricObj* qobj; // ¿ø±âµÕ ¿ÀºêÁ§Æ®
+GLUquadricObj* qobj; // ì›ê¸°ë‘¥ ì˜¤ë¸Œì íŠ¸
 
-GLfloat ambientLight[] = { 0.3f,0.3f,0.3f,1.0f }; // ÁÖº¯±¤
-GLfloat diffuseLight[] = { 0.7f,0.7f,0.7f,1.0f }; // ºĞ»ê±¤
-GLfloat specular[] = { 1.0f,1.0f,1.0f,1.0f }; // ¹İ»ç±¤
-GLfloat position[] = { 400.0f,300.0f,700.0f,1.0f }; // ±¤¿øÀÇ À§Ä¡
+GLfloat AmbientLightValue[] = { 0.3f, 0.3f, 5.3f, 1.0f };
+GLfloat DiffuseLightValue[] = { 0.7f, 0.7f, 5.7f, 1.0f };
+GLfloat SpecularLightValue[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat PositionLightValue[] = { 0.0, 300.0, 0.0, 0.0};
 
 GLfloat		vertices[][3] = {
 	// x, y, z
-	{ -boardWidth, -boardWidth,  0 },	// 0 À­ÂÊ ÁÂÇÏ´Ü
-	{ -boardWidth,  boardWidth,  0 },	// 1 À­ÂÊ ¿ìÇÏ´Ü
-	{ boardWidth,  boardWidth,  0 },	// 2 À­ÂÊ ¿ì»ó´Ü
-	{ boardWidth, -boardWidth,  0 },	// 3 À­ÂÊ ÁÂ»ó´Ü
-	{ -boardWidth, -boardWidth, boardHeight },	// 4 ¾Æ·§ÂÊ ÁÂÇÏ´Ü
-	{ -boardWidth,  boardWidth, boardHeight },	// 5 ¾Æ·§ÂÊ ¿ìÇÏ´Ü
-	{ boardWidth,  boardWidth, boardHeight },	// 6 ¾Æ·§ÂÊ ¿ì»ó´Ü
-	{ boardWidth, -boardWidth, boardHeight } };	// 7 ¾Æ·§ÂÊ ÁÂ»ó´Ü
+	{ -boardWidth, -boardWidth,  0 },	// 0 ìœ—ìª½ ì¢Œí•˜ë‹¨
+	{ -boardWidth,  boardWidth,  0 },	// 1 ìœ—ìª½ ìš°í•˜ë‹¨
+	{ boardWidth,  boardWidth,  0 },	// 2 ìœ—ìª½ ìš°ìƒë‹¨
+	{ boardWidth, -boardWidth,  0 },	// 3 ìœ—ìª½ ì¢Œìƒë‹¨
+	{ -boardWidth, -boardWidth, boardHeight },	// 4 ì•„ë«ìª½ ì¢Œí•˜ë‹¨
+	{ -boardWidth,  boardWidth, boardHeight },	// 5 ì•„ë«ìª½ ìš°í•˜ë‹¨
+	{ boardWidth,  boardWidth, boardHeight },	// 6 ì•„ë«ìª½ ìš°ìƒë‹¨
+	{ boardWidth, -boardWidth, boardHeight } };	// 7 ì•„ë«ìª½ ì¢Œìƒë‹¨
 
 class Player
 {
@@ -71,52 +82,219 @@ public:
 
 Player* player = new Player[playerNum];
 
+// í…ìŠ¤ì³ ë§¤í•‘
+GLubyte* LoadDIBitmap(const char* filename, BITMAPINFO** info);
+GLubyte* pBytes; // ë°ì´í„°ë¥¼ ê°€ë¦¬í‚¬ í¬ì¸í„°
+GLubyte* pBytes_2; // ë°ì´í„°ë¥¼ ê°€ë¦¬í‚¬ í¬ì¸í„°
+BITMAPINFO* info; // ë¹„íŠ¸ë§µ í—¤ë” ì €ì¥í•  ë³€ìˆ˜
+GLuint textures[2];
+void MappingInit();
+// í…ìŠ¤ì³ ë§¤í•‘
+
 void RunPhysics();
 bool IsCollision(int j, int k);
 
-// ÃÊ±â¼³Á¤
+void MainLight()
+{
+	glClearColor(0, 0, 0, 0);
+	glEnable(GL_LIGHTING); //ì¡°ëª…ì„ ì‚¬ìš©í•  ê²ƒì´ë‹¤.
+	glLightfv(GL_LIGHT0, GL_AMBIENT, AmbientLightValue); //Ambient ì¡°ëª…ì˜ ì„±ì§ˆì„ ì„¤ì •í•œë‹¤.
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, DiffuseLightValue); //Diffuse ì¡°ëª…ì˜ ì„±ì§ˆì„ ì„¤ì •í•œë‹¤.
+	glLightfv(GL_LIGHT0, GL_SPECULAR, SpecularLightValue); //Specular ì¡°ëª…ì˜ ì„±ì§ˆì„ ì„¤ì •í•œë‹¤. 
+	glLightfv(GL_LIGHT0, GL_POSITION, PositionLightValue); //ì¡°ëª…ì˜ ìœ„ì¹˜(ê´‘ì›)ë¥¼ ì„¤ì •í•œë‹¤.
+	glEnable(GL_LIGHT0); //ì¡°ëª… ì¤‘ 0 ë²ˆ ì¡°ëª…ì„ ì‚¬ìš©í•  ê²ƒì´ë‹¤.
+
+}
+
+GLubyte* LoadDIBitmap(const char* filename, BITMAPINFO** info)
+{
+	FILE* fp;
+	GLubyte* bits;
+	int bitsize, infosize;
+	BITMAPFILEHEADER header;
+	// ë°”ì´ë„ˆë¦¬ ì½ê¸° ëª¨ë“œë¡œ íŒŒì¼ì„ ì—°ë‹¤
+	if ((fp = fopen(filename, "rb")) == NULL)
+		return NULL;
+	// ë¹„íŠ¸ë§µ íŒŒì¼ í—¤ë”ë¥¼ ì½ëŠ”ë‹¤.
+	if (fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) < 1) {
+		fclose(fp);
+		return NULL;
+	}
+	// íŒŒì¼ì´ BMP íŒŒì¼ì¸ì§€ í™•ì¸í•œë‹¤.
+	if (header.bfType != 'MB') {
+		fclose(fp);
+		return NULL;
+	}
+	// BITMAPINFOHEADER ìœ„ì¹˜ë¡œ ê°„ë‹¤.
+	infosize = header.bfOffBits - sizeof(BITMAPFILEHEADER);
+	// ë¹„íŠ¸ë§µ ì´ë¯¸ì§€ ë°ì´í„°ë¥¼ ë„£ì„ ë©”ëª¨ë¦¬ í• ë‹¹ì„ í•œë‹¤.
+	if ((*info = (BITMAPINFO*)malloc(infosize)) == NULL) {
+		fclose(fp);
+		exit(0);
+		return NULL;
+	}
+	// ë¹„íŠ¸ë§µ ì¸í¬ í—¤ë”ë¥¼ ì½ëŠ”ë‹¤.
+	if (fread(*info, 1, infosize, fp) < (unsigned int)infosize) {
+		free(*info);
+		fclose(fp);
+		return NULL;
+	}
+	// ë¹„íŠ¸ë§µì˜ í¬ê¸° ì„¤ì •
+	if ((bitsize = (*info)->bmiHeader.biSizeImage) == 0)
+		bitsize = ((*info)->bmiHeader.biWidth *
+			(*info)->bmiHeader.biBitCount + 7) / 8.0 *
+		abs((*info)->bmiHeader.biHeight);
+	// ë¹„íŠ¸ë§µì˜ í¬ê¸°ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ í• ë‹¹í•œë‹¤.
+	if ((bits = (unsigned char*)malloc(bitsize)) == NULL) {
+		free(*info);
+		fclose(fp);
+		return NULL;
+	}
+	// ë¹„íŠ¸ë§µ ë°ì´í„°ë¥¼ bit(GLubyte íƒ€ì…)ì— ì €ì¥í•œë‹¤.
+	if (fread(bits, 1, bitsize, fp) < (unsigned int)bitsize) {
+		free(*info); free(bits);
+		fclose(fp);
+		return NULL;
+	}
+	fclose(fp);
+	return bits;
+}
+
+void MappingInit()
+{
+	glGenTextures(2, textures);
+
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+	pBytes = LoadDIBitmap("board.bmp", &info);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, info->bmiHeader.biWidth, info->bmiHeader.biHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pBytes);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, GL_MODULATE);
+
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
+	pBytes_2 = LoadDIBitmap("obstacle.bmp", &info);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, info->bmiHeader.biWidth, info->bmiHeader.biHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pBytes_2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, GL_MODULATE);
+}
+
+// ì´ˆê¸°ì„¤ì •
 void init(void)
 {
+	PlaySound(TEXT(SOUND_FILE_NAME_BGM), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+
+
 	player[0].x = -160.0;		player[0].y = -180.0;		player[0].teamColor = 'r';
 	player[1].x = -80;			player[1].y = -180.0;		player[1].teamColor = 'r';
 	player[2].x = 0.0;			player[2].y = -180.0;		player[2].teamColor = 'r';
 	player[3].x = 80.0;			player[3].y = -180.0;		player[3].teamColor = 'r';
 	player[4].x = 160.0;;		player[4].y = -180.0;		player[4].teamColor = 'r';
-
-	player[5].x = -160.0;		player[5].y = 180.0;		player[5].teamColor = 'b';
-	player[6].x = -80;			player[6].y = 180.0;		player[6].teamColor = 'b';
-	player[7].x = 0.0;			player[7].y = 180.0;		player[7].teamColor = 'b';
-	player[8].x = 80.0;			player[8].y = 180.0;		player[8].teamColor = 'b';
-	player[9].x = 160.0;;		player[9].y = 180.0;		player[9].teamColor = 'b';
+	
+	player[5].x = -160.0;		player[5].y = 180.0;		player[5].teamColor = 'g';
+	player[6].x = -80;			player[6].y = 180.0;		player[6].teamColor = 'g';
+	player[7].x = 0.0;			player[7].y = 180.0;		player[7].teamColor = 'g';
+	player[8].x = 80.0;			player[8].y = 180.0;		player[8].teamColor = 'g';
+	player[9].x = 160.0;;		player[9].y = 180.0;		player[9].teamColor = 'g';
 
 	aliveRed = playerNum / 2;
-	aliveBlue = playerNum / 2;
+	aliveGreen = playerNum / 2;
+
+	MappingInit();
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_NORMALIZE); //´ÜÀ§ ¹ı¼± º¤ÅÍ
-	glEnable(GL_SMOOTH);  // ¾ÈÆ¼ ¾Ë¸®¾Æ½Ì Á¦°Å
-	glEnable(GL_LIGHTING); // Á¶¸í
+	glEnable(GL_NORMALIZE); //ë‹¨ìœ„ ë²•ì„  ë²¡í„°
+	glEnable(GL_SMOOTH);  // ì•ˆí‹° ì•Œë¦¬ì•„ì‹± ì œê±°
 
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-	glLightfv(GL_LIGHT0, GL_POSITION, position);
-	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL); // ì¬ì§ˆ ìƒ‰ê° í‘œí˜„
+	glEnable(GL_TEXTURE_2D);
 
-	glEnable(GL_COLOR_MATERIAL); // ÀçÁú »ö°¨ Ç¥Çö
+	MainLight();
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
 }
 
+void DrawObstacle()
+{
+	glPushMatrix();
+
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
+	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glColor3f(1, 1, 1);
+
+	glTranslatef(0.0f, 0.0f, 1.0f);
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-cubeSize, cubeSize, cubeSize); // { Front }
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-cubeSize, -cubeSize, cubeSize); // { Front }
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(cubeSize, -cubeSize, cubeSize); // { Front }
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(cubeSize, cubeSize, cubeSize); // { Front }
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(cubeSize, cubeSize, cubeSize); // { Right }
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(cubeSize, -cubeSize, cubeSize); // { Right }
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(cubeSize, -cubeSize, -cubeSize); // { Right }
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(cubeSize, cubeSize, -cubeSize); // { Right }
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(cubeSize, cubeSize, -cubeSize); // { Back }
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(cubeSize, -cubeSize, -cubeSize); // { Back }
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-cubeSize, -cubeSize, -cubeSize); // { Back }
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-cubeSize, cubeSize, -cubeSize); // { Back }
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-cubeSize, cubeSize, -cubeSize); // { Left }
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-cubeSize, -cubeSize, -cubeSize); // { Left }
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-cubeSize, -cubeSize, cubeSize); // { Left }
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-cubeSize, cubeSize, cubeSize); // { Left }
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-cubeSize, cubeSize, cubeSize); // { Top }
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(cubeSize, cubeSize, cubeSize); // { Top }
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(cubeSize, cubeSize, -cubeSize); // { Top }
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-cubeSize, cubeSize, -cubeSize); // { Top }
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(cubeSize, -cubeSize, cubeSize); // { Bottom }
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(-cubeSize, -cubeSize, cubeSize); // { Bottom }
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(-cubeSize, -cubeSize, -cubeSize); // { Bottom }
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(cubeSize, -cubeSize, -cubeSize); // { Bottom }
+	glEnd();
+	glPopMatrix();
+}
 
 void DrawPlayer(int num) {
+
 	if (player[num].teamColor == 'r')		glColor3f(1.0, 0.0, 0.0); // red color
-	else if (player[num].teamColor == 'b') 	glColor3f(0.0, 0.0, 1.0); // blue color
+	else if (player[num].teamColor == 'g') 	glColor3f(0.0, 1.0, 0.0); // green color
 
 	glPushMatrix();
-	// ¿ø±âµÕ
+	// ì›ê¸°ë‘¥
 	glTranslated(player[num].x, player[num].y, 0);
 	qobj = gluNewQuadric();
 	gluQuadricDrawStyle(qobj, GL_POLYGON);
@@ -126,7 +304,7 @@ void DrawPlayer(int num) {
 	glPopMatrix();
 
 	glPushMatrix();
-	// ¶Ñ²±
+	// ëšœê»‘
 	glTranslated(player[num].x, player[num].y, height);
 	glBegin(GL_POLYGON);
 
@@ -143,15 +321,20 @@ void DrawPlayer(int num) {
 
 
 void polygon(int a, int b, int c, int d) {
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+	glTexGeni(GL_S,GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glColor3f(1, 1, 1);
+
 	glBegin(GL_POLYGON);
-	glColor3f(0, 1, 0); // Å×½ºÆ®¿ë
+	glTexCoord2f(0.0f, 1.0f);
 	glVertex3fv(vertices[a]);
-	glColor3f(0, 1, 1); // Å×½ºÆ®¿ë
+	glTexCoord2f(1.0f, 1.0f);
 	glVertex3fv(vertices[b]);
-	glColor3f(0, 0, 1); // Å×½ºÆ®¿ë
+	glTexCoord2f(1.0f, 0.0f);
 	glVertex3fv(vertices[c]);
-	glColor3f(1, 0, 0); // Å×½ºÆ®¿ë
+	glTexCoord2f(0.0f, 0.0f);
 	glVertex3fv(vertices[d]);
+
 	glEnd();
 }
 
@@ -164,7 +347,7 @@ void drawGameBoard(void) {
 	polygon(5, 4, 0, 1);
 }
 
-// È­¸éÀÇ ºñÀ² À¯Áö
+// í™”ë©´ì˜ ë¹„ìœ¨ ìœ ì§€
 void reshape(int w, int h)
 {
 	glViewport(0, 0, w, h);
@@ -173,32 +356,32 @@ void reshape(int w, int h)
 	gluPerspective(45.0, 1.0, 1.0, 1000);
 }
 
-// Ä«¸Ş¶ó À§Ä¡ ¼³Á¤
+// ì¹´ë©”ë¼ ìœ„ì¹˜ ì„¤ì •
 void cameraSetting(void)
 {
 
-	if (cameraMode == 1) 
+	if (cameraMode == 1)
 	{
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		/*
-		eyeX, eyeY, eyeZ : ´«ÀÇ À§Ä¡(Ä«¸Ş¶óÀÇ À§Ä¡)
-		centerX, centerY, centerZ : Ä«¸Ş¶óÀÇ ÃÊÁ¡(ÂüÁ¶ À§Ä¡)
-		upX, upY, upZ : Ä«¸Ş¶óÀÇ À§ÂÊº¤ÅÍ ¹æÇâ ÁöÁ¤(x°¡ 1ÀÌ¸é xÃàÀ¸·Î ´©¿öÀÖ°í, y°¡ 1ÀÌ¸é yÃàÀ» Áß½ÉÀ¸·Î ¼¼¿öÁ®ÀÖ´Ù.)
+		eyeX, eyeY, eyeZ : ëˆˆì˜ ìœ„ì¹˜(ì¹´ë©”ë¼ì˜ ìœ„ì¹˜)
+		centerX, centerY, centerZ : ì¹´ë©”ë¼ì˜ ì´ˆì (ì°¸ì¡° ìœ„ì¹˜)
+		upX, upY, upZ : ì¹´ë©”ë¼ì˜ ìœ„ìª½ë²¡í„° ë°©í–¥ ì§€ì •(xê°€ 1ì´ë©´ xì¶•ìœ¼ë¡œ ëˆ„ì›Œìˆê³ , yê°€ 1ì´ë©´ yì¶•ì„ ì¤‘ì‹¬ìœ¼ë¡œ ì„¸ì›Œì ¸ìˆë‹¤.)
 		*/
 		gluLookAt(0.0, 0.0, cameraZoom, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	}
-	
+
 	else if (cameraMode == 2)
 	{
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		/*
-		eyeX, eyeY, eyeZ : ´«ÀÇ À§Ä¡(Ä«¸Ş¶óÀÇ À§Ä¡)
-		centerX, centerY, centerZ : Ä«¸Ş¶óÀÇ ÃÊÁ¡(ÂüÁ¶ À§Ä¡)
-		upX, upY, upZ : Ä«¸Ş¶óÀÇ À§ÂÊº¤ÅÍ ¹æÇâ ÁöÁ¤(x°¡ 1ÀÌ¸é xÃàÀ¸·Î ´©¿öÀÖ°í, y°¡ 1ÀÌ¸é yÃàÀ» Áß½ÉÀ¸·Î ¼¼¿öÁ®ÀÖ´Ù.)
+		eyeX, eyeY, eyeZ : ëˆˆì˜ ìœ„ì¹˜(ì¹´ë©”ë¼ì˜ ìœ„ì¹˜)
+		centerX, centerY, centerZ : ì¹´ë©”ë¼ì˜ ì´ˆì (ì°¸ì¡° ìœ„ì¹˜)
+		upX, upY, upZ : ì¹´ë©”ë¼ì˜ ìœ„ìª½ë²¡í„° ë°©í–¥ ì§€ì •(xê°€ 1ì´ë©´ xì¶•ìœ¼ë¡œ ëˆ„ì›Œìˆê³ , yê°€ 1ì´ë©´ yì¶•ì„ ì¤‘ì‹¬ìœ¼ë¡œ ì„¸ì›Œì ¸ìˆë‹¤.)
 		*/
-		gluLookAt(0.0, -660.0, 400, player[selectedPlayer].x, player[selectedPlayer].y, 0.0, 0.0, 1.0, 0.0);
+		gluLookAt(player[cameraObject].x, player[cameraObject].y - 500, 400, player[cameraObject].x, player[cameraObject].y, 0.0, 0.0, 1.0, 0.0);
 	}
 
 }
@@ -213,6 +396,8 @@ void renderbitmap(float x, float y, void* font, char* string) {
 
 void DrawText(void)
 {
+	if (cameraCount != 0)	return; // ì¹´ë©”ë¼ ì´ë™ì¤‘ì—ëŠ” í‘œì‹œ X
+
 	char buf[100] = { 0 };
 	glColor3f(0.0, 0.0, 0.0);
 	sprintf_s(buf, "Current Turn :");
@@ -225,30 +410,41 @@ void DrawText(void)
 		renderbitmap(-70, -220, GLUT_BITMAP_TIMES_ROMAN_24, buf);
 	}
 
-	else if (currentTurn == 'b')
+	else if (currentTurn == 'g')
 	{
-		glColor3f(0.0, 0.0, 1.0);
-		sprintf_s(buf, "Blue");
+		glColor3f(0.0, 1.0, 0.0);
+		sprintf_s(buf, "Green");
 		renderbitmap(-70, -220, GLUT_BITMAP_TIMES_ROMAN_24, buf);
 	}
 
-	// ½Â¸® ÆÇÁ¤
-	if (aliveBlue == 0)
+	// ìŠ¹ë¦¬ íŒì •
+	if (aliveGreen == 0)
 	{
-		glColor3f(1.0, 0.0, 0.0);
-		sprintf_s(buf, "RED Win");
-		renderbitmap(0, 0, GLUT_BITMAP_TIMES_ROMAN_24, buf);
+		PlaySound(TEXT(SOUND_FILE_NAME_WIN), NULL, SND_FILENAME | SND_ASYNC);
+		aliveGreen = -1;
 	}
+
 	else if (aliveRed == 0)
 	{
-		glColor3f(0.0, 0.0, 1.0);
-		sprintf_s(buf, "Blue Win");
-		renderbitmap(0, 0, GLUT_BITMAP_TIMES_ROMAN_24, buf);
+		PlaySound(TEXT(SOUND_FILE_NAME_WIN), NULL, SND_FILENAME | SND_ASYNC);
+		aliveRed = -1;
 	}
 
+	if (aliveGreen == -1)
+	{
+			glColor3f(1.0, 0.0, 0.0);
+			sprintf_s(buf, "RED Win");
+			renderbitmap(0, 100, GLUT_BITMAP_TIMES_ROMAN_24, buf);
+	}
+	else if (aliveRed == -1)
+	{
+			glColor3f(0.0, 1.0, 0.0);
+			sprintf_s(buf, "Green Win");
+			renderbitmap(0, 100, GLUT_BITMAP_TIMES_ROMAN_24, buf);
+	}
 }
 
-// È­¸é ±×¸®±â
+// í™”ë©´ ê·¸ë¦¬ê¸°
 void display(void)
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -258,6 +454,7 @@ void display(void)
 
 	DrawText();
 	drawGameBoard();
+	DrawObstacle();
 
 	for (int i = 0; i < playerNum; i++)
 		DrawPlayer(i);
@@ -274,7 +471,7 @@ void OutCheck(int i)
 		player[i].x *= 10;
 		player[i].alive = false;
 		if (player[i].teamColor == 'r') aliveRed -= 1;
-		else if (player[i].teamColor == 'b') aliveBlue -= 1;
+		else if (player[i].teamColor == 'g') aliveGreen -= 1;
 	}
 
 	else if ((player[i].y < -boardWidth || player[i].y > boardWidth) && (player[i].alive == true))
@@ -282,7 +479,7 @@ void OutCheck(int i)
 		player[i].y *= 10;
 		player[i].alive = false;
 		if (player[i].teamColor == 'r') aliveRed -= 1;
-		else if (player[i].teamColor == 'b') aliveBlue -= 1;
+		else if (player[i].teamColor == 'g') aliveGreen -= 1;
 	}
 
 
@@ -292,14 +489,25 @@ void RunPhysics()
 {
 	for (int i = 0; i < playerNum; i++)
 	{
+		// ì†ë„ê°€ ìˆìœ¼ë©´ ì´ë™
 		if (player[i].velocity > 0)
 		{
 			player[i].x += (player[i].dirX / speedControl) * (player[i].velocity / speedControl);
 			player[i].y -= (player[i].dirY / speedControl) * (player[i].velocity / speedControl);
 		}
 
+		// ì¥ì• ë¬¼ ì¶©ëŒ íŒì •
+		if ((player[i].x >= 0-cubeSize) && (player[i].x <= 0+cubeSize))
+			if ((player[i].y >= 0-cubeSize) && (player[i].y <= 0+cubeSize))
+			{
+				player[i].x -= (player[i].dirX / speedControl) * (player[i].velocity / speedControl);
+				player[i].y += (player[i].dirY / speedControl) * (player[i].velocity / speedControl);
+				player[i].dirX *= -1;
+				player[i].dirY *= -1;
+				player[i].velocity = player[i].velocity / 1.5;
+			}
 
-
+		// ì¶©ëŒ íŒì •
 		for (int j = 0; j < playerNum; j++)
 		{
 			if (IsCollision(i, j))
@@ -310,16 +518,17 @@ void RunPhysics()
 
 				player[i].x -= (player[i].dirX / speedControl) * (player[i].velocity / speedControl);
 				player[i].y += (player[i].dirY / speedControl) * (player[i].velocity / speedControl);
-				player[i].velocity = player[i].velocity/2;
+				player[i].velocity = player[i].velocity / 2;
+
 			}
 		}
-		
+
 		player[i].velocity -= 0.5;
 
 		if (player[i].velocity < 0.0)
 			player[i].velocity = 0.0;
 
-		OutCheck(i); // ÇÃ·¹ÀÌ¾î°¡ °æ±âÀå ¹ÛÀ¸·Î ³ª°¬´Â°¡?
+		OutCheck(i); // í”Œë ˆì´ì–´ê°€ ê²½ê¸°ì¥ ë°–ìœ¼ë¡œ ë‚˜ê°”ëŠ”ê°€?
 
 		glutPostRedisplay();
 
@@ -337,7 +546,7 @@ bool IsCollision(int i, int j)
 	radiusSquare = (playerRadius + playerRadius) * (playerRadius + playerRadius);
 
 	if (xSquare + ySquare < radiusSquare)
-			return true;
+		return true;	
 
 	return false;
 }
@@ -372,67 +581,67 @@ void mouseEvent(GLint Button, GLint State, GLint X, GLint Y)
 
 	if (Button == GLUT_LEFT_BUTTON && State == GLUT_DOWN)
 	{
-		selectedPlayer = -1; // ¿¹¿ÜÃ³¸® Á¶°Ç ÃÊ±âÈ­
+		selectedPlayer = -1; // ì˜ˆì™¸ì²˜ë¦¬ ì¡°ê±´ ì´ˆê¸°í™”
 
-		// ¸¶¿ì½º ´©¸¥ À§Ä¡                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ÀÇ ÁÂÇ¥ ÀúÀå
+		// ë§ˆìš°ìŠ¤ ëˆ„ë¥¸ ìœ„ì¹˜                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ì˜ ì¢Œí‘œ ì €ì¥
 		playerX = X;
 		playerY = Y;
 
-		// º¸Á¤µÈ ¸¶¿ì½º Å¬¸¯ À§Ä¡
+		// ë³´ì •ëœ ë§ˆìš°ìŠ¤ í´ë¦­ ìœ„ì¹˜
 		corrClickX = X - corrWin;
 		corrClickY = Y - corrWin;
 
-		// ÇÃ·¹ÀÌ¾î¸¦ ¼±ÅÃ ÇÏ¿´´Â°¡?
+		// í”Œë ˆì´ì–´ë¥¼ ì„ íƒ í•˜ì˜€ëŠ”ê°€?
 		for (int i = 0; i < playerNum; i++)
 		{
 			if (IsSelected(i))
 				selectedPlayer = i;
 		}
-
 	}
 
 	if (Button == GLUT_LEFT_BUTTON && State == GLUT_UP)
 	{
-		// ¿¹¿ÜÃ³¸®
+		// ì˜ˆì™¸ì²˜ë¦¬
 		if (selectedPlayer == -1)
 			return;
 		if (currentTurn != player[selectedPlayer].teamColor)
 			return;
 
-		// ¸¶¿ì½º ¶© À§Ä¡
+		// ë§ˆìš°ìŠ¤ ë• ìœ„ì¹˜
 		mouseX = X;
 		mouseY = Y;
 
-		// ¿òÁ÷ÀÏ °Å¸® °è»ê (´ÜÀ§º¤ÅÍ)
+		// ì›€ì§ì¼ ê±°ë¦¬ ê³„ì‚° (ë‹¨ìœ„ë²¡í„°)
 		movingX = playerX - mouseX;
 		movingY = playerY - mouseY;
 
-		// ÀÌµ¿¹æÇâ ¼³Á¤
+		// ì´ë™ë°©í–¥ ì„¤ì •
 		player[selectedPlayer].dirX = movingX;
 		player[selectedPlayer].dirY = movingY;
-		// ¼Óµµ ¼³Á¤
+		// ì†ë„ ì„¤ì •
 		float squareDirX, squareDirY;
 		squareDirX = player[selectedPlayer].dirX * player[selectedPlayer].dirX;
 		squareDirY = player[selectedPlayer].dirY * player[selectedPlayer].dirY;
-	
+
 		player[selectedPlayer].velocity = sqrt(squareDirX + squareDirY);
 		if (player[selectedPlayer].velocity > 120.0)	player[selectedPlayer].velocity = 120.0;
 
 		glutPostRedisplay();
-		selectedPlayer = -1;		// ¿¹¿ÜÁ¶°Ç ÃÊ±âÈ­
-		glutTimerFunc(40, CameraTimer, 1);	// Ä«¸Ş¶ó ÁÜ
+		cameraObject = selectedPlayer;
+		selectedPlayer = -1;		// ì˜ˆì™¸ì¡°ê±´ ì´ˆê¸°í™”
+		glutTimerFunc(20, CameraTimer, 1);	// ì¹´ë©”ë¼ ì¤Œ
 
-		// ÅÏ ³Ñ±è
+		// í„´ ë„˜ê¹€
 
-		if (currentTurn == 'r')		currentTurn = 'b';
-		else if (currentTurn == 'b')		currentTurn = 'r';
+		if (currentTurn == 'r')		currentTurn = 'g';
+		else if (currentTurn == 'g')		currentTurn = 'r';
 
 	}
 }
 
 void mouseMotion(GLint X, GLint Y)
 {
-	// ¸¶¿ì½ºÀÇ ÁÂÇ¥
+	// ë§ˆìš°ìŠ¤ì˜ ì¢Œí‘œ
 	mouseX = X - corrWin;
 	mouseY = Y - corrWin;
 }
@@ -444,7 +653,7 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowPosition(winSize, winSize);
 	glutInitWindowSize(winSize, winSize);
-	glutCreateWindow("¾Ë±î±â °ÔÀÓ");
+	glutCreateWindow("ì•Œê¹Œê¸° ê²Œì„");
 
 	init();
 
